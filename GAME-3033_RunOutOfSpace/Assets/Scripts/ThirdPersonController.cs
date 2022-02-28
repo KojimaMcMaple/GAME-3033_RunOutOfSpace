@@ -77,6 +77,7 @@ namespace Player
 		[Header("Pickup")]
 		[SerializeField] private float pickup_range_ = 5.0f;
 		[SerializeField] private float move_force_ = 100.0f;
+		[SerializeField] private float rotate_amount_ = 50.0f;
 		private GameObject held_obj_;
 
 		[Header("Gameplay Stats")]
@@ -86,11 +87,15 @@ namespace Player
 		[SerializeField] private int ammo_reserve_ = 100; //ammo outside mag
 		[SerializeField] private int ammo_mag_ = 30; //size of mag
 		[SerializeField] private int ammo_curr_ = 30; //curr ammo in mag
+		public bool is_victory = false;
 
 		[Header("VFX_SFX")]
 		[SerializeField] ParticleSystem muzzle_flash_vfx_;
 		[SerializeField] ParticleSystem held_obj_vfx_;
 		[SerializeField] Light pickup_range_vfx_;
+		[SerializeField] private AudioClip shoot_sfx_;
+		[SerializeField] private AudioSource hover_audio_;
+		private AudioSource audio_source_;
 
 		[Header("UI")]
 		[SerializeField] TMP_Text ammo_txt_;
@@ -158,6 +163,8 @@ namespace Player
 
 			muzzle_flash_vfx_.Stop();
 			held_obj_vfx_.Stop();
+
+			audio_source_ = GetComponent<AudioSource>();
 		}
 
 		private void Start()
@@ -198,7 +205,6 @@ namespace Player
 				Ray ray = Camera.main.ScreenPointToRay(screen_center_point);
 				RaycastHit hit;
 				bool is_hit = false;
-				pickup_range_vfx_.color = Color.blue;
 				if (Physics.Raycast(ray, out hit, pickup_range_, aim_collider_mask_))
                 {
                     //aim_debug_.position = hit.point;
@@ -249,12 +255,15 @@ namespace Player
 						// VFX
 						muzzle_flash_vfx_.Play();
 
-                        if (is_hit)
+						// SFX
+						audio_source_.PlayOneShot(shoot_sfx_, 1.0f);
+
+						if (is_hit)
                         {
 							// Logic
 							//ammo_curr_--;
 							DoPickUpObj(hit.transform.gameObject);
-							held_obj_vfx_.Play();
+							
 
 							//// UI
 							//DoUpdateAmmoTxt();
@@ -265,6 +274,14 @@ namespace Player
 						DoReload();
 						input_.is_shooting = false; //kill input to prevent shooting when not intending to
 					}
+				}
+
+				// ROT HELD OBJ
+				if (input_.is_rotating)
+                {
+					held_obj_.transform.eulerAngles = new Vector3(held_obj_.transform.eulerAngles.x, 
+						held_obj_.transform.eulerAngles.y, 
+						held_obj_.transform.eulerAngles.z + rotate_amount_ * Time.deltaTime);
 				}
 
                 // MOVE HELD OBJ
@@ -309,6 +326,11 @@ namespace Player
 			//aim_rig_weight_ = 1f; //DEBUG
 
 			aim_rig_.weight = Mathf.Lerp(aim_rig_.weight, aim_rig_weight_, Time.deltaTime * 20f);
+
+            if (is_victory)
+            {
+				controller_.enabled = false;
+			}
 		}
 
 		private void LateUpdate()
@@ -557,7 +579,11 @@ namespace Player
 			held_obj_ = pick_obj;
 
 			con.is_held = true;
-        }
+
+			held_obj_vfx_.Play();
+
+			hover_audio_.Play();
+		}
 
 		private void DoMoveHeldObj()
         {
@@ -567,7 +593,7 @@ namespace Player
 				held_obj_.GetComponent<Rigidbody>().AddForce(move_dir * move_force_);
             }
 			held_obj_.transform.eulerAngles = Vector3.Lerp(held_obj_.transform.eulerAngles,
-				new Vector3(0, held_obj_.transform.eulerAngles.y, 0), 10);
+				new Vector3(-90, held_obj_.transform.eulerAngles.y, held_obj_.transform.eulerAngles.z), 10);
 
 		}
 
@@ -582,12 +608,22 @@ namespace Player
 			held_obj_.GetComponent<ObjController>().is_held = false;
 
 			held_obj_ = null;
+
+			hover_audio_.Stop();
 		}
 
-		/// <summary>
-		/// IDamageable methods
-		/// </summary>
-		public void Init() //Link hp to class hp
+        private void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            if (hit.gameObject.CompareTag("Goal"))
+            {
+				is_victory = true;
+            }
+        }
+
+        /// <summary>
+        /// IDamageable methods
+        /// </summary>
+        public void Init() //Link hp to class hp
 		{
 			health = hp_;
 			obj_type = GlobalEnums.ObjType.PLAYER;

@@ -14,6 +14,7 @@ namespace Player
 		public bool sprint;
 		public bool is_aiming;
 		public bool is_shooting;
+		public bool is_rotating;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -57,6 +58,11 @@ namespace Player
 		{
 			ShootInput(value.isPressed);
 		}
+
+		public void OnRotateObj(InputValue value)
+		{
+			RotateObjInput(value.isPressed);
+		}
 #else
 	// old input sys if we do decide to have it (most likely wont)...
 #endif
@@ -90,6 +96,11 @@ namespace Player
 		public void ShootInput(bool newAimState)
 		{
 			is_shooting = newAimState;
+		}
+
+		public void RotateObjInput(bool newAimState)
+		{
+			is_rotating = newAimState;
 		}
 
 #if !UNITY_IOS || !UNITY_ANDROID

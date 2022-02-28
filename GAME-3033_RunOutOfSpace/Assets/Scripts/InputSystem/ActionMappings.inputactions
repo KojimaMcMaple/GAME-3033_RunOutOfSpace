@@ -1,5 +1,5 @@
 {
-    "name": "StarterAssets",
+    "name": "ActionMappings",
     "maps": [
         {
             "name": "Player",
@@ -55,6 +55,15 @@
                     "type": "Button",
                     "id": "803c49cf-adcb-4363-9284-7436f8543c3d",
                     "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RotateObj",
+                    "type": "PassThrough",
+                    "id": "f1c6deac-02d8-4695-a461-ef3fe0072412",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -278,6 +287,28 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Shoot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8576c947-6054-4a48-9a21-53bdad456ee3",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "RotateObj",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d689b005-df12-407a-ad63-496c2c08f57c",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "RotateObj",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
