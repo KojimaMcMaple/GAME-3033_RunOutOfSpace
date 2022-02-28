@@ -1,19 +1,21 @@
 fileFormatVersion: 2
 guid: 8e0ec07613e5bc94784fbbc5d47ecec7
-timeCreated: 1445846555
-licenseType: Store
 TrueTypeFontImporter:
-  serializedVersion: 2
-  fontSize: 16
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 32
   forceTextureCase: -2
-  characterSpacing: 1
-  characterPadding: 0
+  characterSpacing: 0
+  characterPadding: 1
   includeFontData: 1
-  use2xBehaviour: 0
-  fontNames: []
+  fontNames:
+  - Wartorn
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
   userData: 
   assetBundleName: 
   assetBundleVariant: 
