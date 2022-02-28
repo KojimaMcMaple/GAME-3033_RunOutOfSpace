@@ -75,8 +75,9 @@ namespace Player
 		[SerializeField] private Rig aim_rig_;
 
 		[Header("Pickup")]
-		[SerializeField] private float pickup_range_ = 5.0f;
-		[SerializeField] private float move_force_ = 100.0f;
+		[SerializeField] private float pickup_range_ = 11.0f;
+		[SerializeField] private float move_force_ = 40.0f;
+		[SerializeField] private float push_force_ = 200.0f;
 		[SerializeField] private float rotate_amount_ = 50.0f;
 		private GameObject held_obj_;
 
@@ -94,6 +95,7 @@ namespace Player
 		[SerializeField] ParticleSystem held_obj_vfx_;
 		[SerializeField] Light pickup_range_vfx_;
 		[SerializeField] private AudioClip shoot_sfx_;
+		[SerializeField] private AudioClip push_sfx_;
 		[SerializeField] private AudioSource hover_audio_;
 		private AudioSource audio_source_;
 
@@ -240,33 +242,45 @@ namespace Player
 				aim_rig_weight_ = 1f;
 
 				// SHOOTING
-				if (input_.is_shooting && held_obj_ == null)
+				if (input_.is_shooting )
                 {
                     if (ammo_curr_ > 0)
                     {
-						Vector3 aim_shoot_dir = (mouse_world_pos - bullet_spawn_pos_.position).normalized; //get dir from bullet_spawn_pos_ to crosshair
-																											//_bulletManager.GetBullet(bullet_spawn_pos_.position, Quaternion.LookRotation(aim_dir, Vector3.up), GlobalEnums.ObjType.PLAYER);
-						bullet_manager_.GetBullet(bullet_spawn_pos_.position, aim_shoot_dir, GlobalEnums.ObjType.PLAYER);
-						input_.is_shooting = false;
-
-						// Animation
-						animator_.SetTrigger(anim_id_shoot_);
-
-						// VFX
-						muzzle_flash_vfx_.Play();
-
-						// SFX
-						audio_source_.PlayOneShot(shoot_sfx_, 1.0f);
-
-						if (is_hit)
+                        if (held_obj_ == null) //try pickup
                         {
-							// Logic
-							//ammo_curr_--;
-							DoPickUpObj(hit.transform.gameObject);
-							
+							Vector3 aim_shoot_dir = (mouse_world_pos - bullet_spawn_pos_.position).normalized; //get dir from bullet_spawn_pos_ to crosshair
+																											   //_bulletManager.GetBullet(bullet_spawn_pos_.position, Quaternion.LookRotation(aim_dir, Vector3.up), GlobalEnums.ObjType.PLAYER);
+							bullet_manager_.GetBullet(bullet_spawn_pos_.position, aim_shoot_dir, GlobalEnums.ObjType.PLAYER);
+							input_.is_shooting = false;
 
-							//// UI
-							//DoUpdateAmmoTxt();
+							// Animation
+							animator_.SetTrigger(anim_id_shoot_);
+
+							// VFX
+							muzzle_flash_vfx_.Play();
+
+							// SFX
+							audio_source_.PlayOneShot(shoot_sfx_, 1.0f);
+
+							if (is_hit)
+							{
+								// Logic
+								//ammo_curr_--;
+								DoPickUpObj(hit.transform.gameObject);
+
+								//// UI
+								//DoUpdateAmmoTxt();
+							}
+						}
+                        else //try push
+                        {
+							Vector3 move_dir = ray.direction;
+							held_obj_.GetComponent<Rigidbody>().AddForce(move_dir * push_force_);
+							DoDropHeldObj();
+							input_.is_shooting = false;
+
+							// SFX
+							audio_source_.PlayOneShot(push_sfx_, 1.0f);
 						}
 					}
                     else if (!is_reload_)
@@ -295,7 +309,6 @@ namespace Player
                 if (held_obj_ != null)
                 {
 					DoDropHeldObj();
-					held_obj_vfx_.Stop();
 				}
 				if (input_.is_shooting)
 				{
@@ -608,6 +621,8 @@ namespace Player
 			held_obj_.GetComponent<ObjController>().is_held = false;
 
 			held_obj_ = null;
+
+			held_obj_vfx_.Stop();
 
 			hover_audio_.Stop();
 		}
