@@ -21,8 +21,8 @@ public class ObjController : MonoBehaviour
     private Rigidbody rb_;
     private float timer_ = 0f;
     private bool is_activated_ = false;
-    public bool is_interactable_ = true;
-    public bool is_held_ = false;
+    public bool is_interactable = true;
+    public bool is_held = false;
 
     private void Awake()
     {
@@ -50,7 +50,7 @@ public class ObjController : MonoBehaviour
     /// </summary>
     private void CheckActive()
     {
-        if (is_activated_ && is_interactable_)
+        if (is_activated_ && is_interactable)
         {
             timer_ += Time.deltaTime;
             if (timer_ > active_timer_)
@@ -58,7 +58,7 @@ public class ObjController : MonoBehaviour
                 SetObjInactive();
             }
         }
-        if (is_held_)
+        if (is_held)
         {
             timer_ = 0f;
         }
@@ -66,7 +66,7 @@ public class ObjController : MonoBehaviour
 
     private void SetObjInactive()
     {
-        is_interactable_ = false;
+        is_interactable = false;
         GetComponent<Renderer>().material = obj_manager_.inactive_mat;
         rb_.isKinematic = true;
     }

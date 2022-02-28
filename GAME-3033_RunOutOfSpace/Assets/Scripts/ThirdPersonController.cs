@@ -198,7 +198,8 @@ namespace Player
 				Ray ray = Camera.main.ScreenPointToRay(screen_center_point);
 				RaycastHit hit;
 				bool is_hit = false;
-                if (Physics.Raycast(ray, out hit, pickup_range_, aim_collider_mask_))
+				pickup_range_vfx_.color = Color.blue;
+				if (Physics.Raycast(ray, out hit, pickup_range_, aim_collider_mask_))
                 {
                     //aim_debug_.position = hit.point;
                     //mouse_world_pos = hit.point;
@@ -539,17 +540,23 @@ namespace Player
 
 		private void DoPickUpObj(GameObject pick_obj)
         {
+			ObjController con = pick_obj.GetComponent<ObjController>();
 			Rigidbody rb = pick_obj.GetComponent<Rigidbody>();
-			if (rb)
-            {
-				rb.useGravity = false;
-				rb.drag = 10.0f;
-
-				rb.transform.parent = aim_debug_;
-				held_obj_ = pick_obj;
-
-				pick_obj.GetComponent<ObjController>().is_held_ = true;
+			if (rb == null || con == null)
+			{
+				return;
 			}
+            if (!con.is_interactable)
+            {
+				return;
+            }
+			rb.useGravity = false;
+			rb.drag = 10.0f;
+
+			rb.transform.parent = aim_debug_;
+			held_obj_ = pick_obj;
+
+			con.is_held = true;
         }
 
 		private void DoMoveHeldObj()
@@ -572,7 +579,7 @@ namespace Player
 
 			held_obj_.transform.parent = null;
 
-			held_obj_.GetComponent<ObjController>().is_held_ = false;
+			held_obj_.GetComponent<ObjController>().is_held = false;
 
 			held_obj_ = null;
 		}
